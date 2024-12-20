@@ -8,50 +8,61 @@
 import SwiftUI
 
 struct DashBoardView: View {
-    @State private var selectedItem: String? = "home" // Track the selected item
-    @State private var isRightSidebarVisible: Bool = false // Toggle right sidebar
+    @State private var selectedItem: String? = "home"
+    @State private var isRightSidebarVisible: Bool = false
+
     var body: some View {
-          ZStack {
-              // Main NavigationSplitView
-              NavigationSplitView {
-                  SideBarView(selectedItem: $selectedItem)
-                      .frame(minWidth: 100, idealWidth: 150, maxWidth: 500)
-              } detail: {
-                  // Displaying different views
-                  switch selectedItem {
-                  case "home":
-                      HomeView()
-                  case "settings":
-                      SettingsView()
-                  default:
-                      Text("Please select an item")
-                          .foregroundColor(.gray)
-                  }
-              }
-              .inspector(isPresented: $isRightSidebarVisible, content: {
-                  SideBarRight(isRightSidebarVisible: $isRightSidebarVisible)
-              })
-
-              // Floating Button when the inspector is closed
-              if !isRightSidebarVisible {
-                  VStack {
-                      HStack {
-                          Spacer()
-                          Button(action: {
-                              isRightSidebarVisible = true // Open the right sidebar
-                          }) {
-                              Image(systemName: "sidebar.right")
-                                  .font(.title2)
-                          }
-                          .padding()
-                      }
-                      Spacer()
-                  }
-              }
-          }
-      }
-
+        ZStack {
+            NavigationSplitView {
+                SideBarView(selectedItem: $selectedItem)
+                    .frame(minWidth: 100, idealWidth: 150, maxWidth: 500)
+            } detail: {
+                Group {
+                    switch selectedItem {
+                    case "home":
+                        HomeView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .toolbar {
+                                ToolbarItem(
+                                    id: "sideBarToggle",
+                                    placement: .topBarTrailing
+                                ) {
+                                    Button(action: {
+                                        isRightSidebarVisible.toggle()
+                                    }) {
+                                        Image(systemName: "sidebar.right")
+                                    }
+                                }
+                            }
+                    case "settings":
+                        SettingsView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(UIColor.systemBackground))
+                    default:
+                        Text("Please select an item")
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(id: "sideBarToggle", placement: .topBarLeading) {
+                    Button(action: {
+                        isRightSidebarVisible.toggle()
+                        print("isRightSidebarVisible: \(isRightSidebarVisible)")
+                    }) {
+                        Image(systemName: "sidebar.right")
+                    }
+                }
+            }
+            .inspector(isPresented: $isRightSidebarVisible) {
+                SideBarRight(isRightSidebarVisible: $isRightSidebarVisible)
+                    .zIndex(1)
+            }
+        }
+    }
 }
+
 
 
 #Preview {
